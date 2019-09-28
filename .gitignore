@@ -2362,3 +2362,15 @@ CNN_python/result_images/acc_and_loss.csv
 CNN_python/result_images/accuracy_9_14.png
 CNN_python/result_images/loss_9_14_DGAM.png
 CNN_python/result_images/テスト時間計測ファイル.csv
+CNN_python/execute/9_28_DGIM_validation/GPU＿TEST.ipynb
+CNN_python/execute/9_28_DGIM_validation/Untitled.ipynb
+CNN_python/execute/9_28_DGIM_validation/.ipynb_checkpoints/GPU＿TEST-checkpoint.ipynb
+CNN_python/execute/9_28_DGIM_validation/.ipynb_checkpoints/Untitled-checkpoint.ipynb
+CNN_python/execute/9_28_DGIM_validation/9_12_data_save/2019_09_14accuracy.npy
+CNN_python/execute/9_28_DGIM_validation/9_12_data_save/2019_09_14loss.npy
+CNN_python/execute/9_28_DGIM_validation/9_12_data_save/2019_09_16accuracy.npy
+CNN_python/execute/9_28_DGIM_validation/9_12_data_save/2019_09_16loss.npy
+CNN_python/execute/9_28_DGIM_validation/__pycache__/config.cpython-36.pyc
+CNN_python/execute/9_28_DGIM_validation/__pycache__/config.cpython-37.pyc
+CNN_python/execute/9_28_DGIM_validation/__pycache__/data_loader.cpython-36.pyc
+CNN_python/execute/9_28_DGIM_validation/__pycache__/data_loader.cpython-37.pyc
