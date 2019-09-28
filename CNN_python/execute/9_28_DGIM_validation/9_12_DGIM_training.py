@@ -14,7 +14,7 @@ import cv2
 import datetime as dt
 
 class ConvNN(object):
-    def __init__(self, batchsize=10,
+    def __init__(self, batchsize=cf.batch_size,
                  epochs=20, learning_rate=1e-4, 
                  dropout_rate=0.5,
                  shuffle=True, random_seed=None):
@@ -222,7 +222,7 @@ class ConvNN(object):
 
 
 
-def batch_generator(X, y, batch_size=10, 
+def batch_generator(X, y, batch_size=50, 
                     shuffle=False, random_seed=None):
     
     idx = np.arange(y.shape[0])
@@ -276,8 +276,8 @@ X_data = np.reshape(X_data,[-1,cf.Height*cf.Width])
     # test_imgs, test_gts = dl_test.get_minibatch(shuffle=True)
 print('Rows: %d,  Columns: %d' % (X_data.shape[0], X_data.shape[1]))
 
-X_train, y_train = X_data[:700], y_data[:700]
-X_valid, y_valid = X_data[700:], y_data[700:]
+X_train, y_train = X_data[:-300], y_data[:-300]
+X_valid, y_valid = X_data[-300:], y_data[-300:]
 
 X_test,y_test = zip(*random.sample(list(zip(X_data,y_data)),100))
 X_test = np.array(X_test)
