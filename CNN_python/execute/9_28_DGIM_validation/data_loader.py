@@ -22,7 +22,7 @@ class DataLoader():
         self.prepare_datas(shuffle=shuffle)
 
     def prepare_datas(self, shuffle=True):
-        folder_path = "C://Users//nishitsuji//Documents//myfile//python_tensorflow//dataset"
+        folder_path = 'c://Users//youhe//myfile//CNN//dataset//after_norm//'
         print('------------')
         label_paths = glob.glob(folder_path + '//*')
 

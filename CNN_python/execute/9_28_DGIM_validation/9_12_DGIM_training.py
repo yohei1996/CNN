@@ -14,7 +14,7 @@ import cv2
 import datetime as dt
 
 class ConvNN(object):
-    def __init__(self, batchsize=64,
+    def __init__(self, batchsize=10,
                  epochs=20, learning_rate=1e-4, 
                  dropout_rate=0.5,
                  shuffle=True, random_seed=None):
@@ -44,7 +44,8 @@ class ConvNN(object):
             
         ## create a session
         config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
+        # config.gpu_options.allow_growth = True
+        config.gpu_options.per_process_gpu_memory_fraction = 0.4
         config.gpu_options.visible_device_list="0"
         self.sess = tf.Session(graph=g,config=config)
                 
@@ -220,7 +221,7 @@ class ConvNN(object):
 
 
 
-def batch_generator(X, y, batch_size=64, 
+def batch_generator(X, y, batch_size=10, 
                     shuffle=False, random_seed=None):
     
     idx = np.arange(y.shape[0])
