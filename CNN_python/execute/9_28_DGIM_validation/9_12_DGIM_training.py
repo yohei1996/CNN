@@ -45,8 +45,9 @@ class ConvNN(object):
         ## create a session
         config = tf.ConfigProto()
         # config.gpu_options.allow_growth = True
-        config.gpu_options.per_process_gpu_memory_fraction = 0.4
+        # config.gpu_options.per_process_gpu_memory_fraction = 0.2
         config.gpu_options.visible_device_list="0"
+
         self.sess = tf.Session(graph=g,config=config)
                 
     def build(self):
@@ -162,7 +163,7 @@ class ConvNN(object):
         y_data = np.array(training_set[1])
 
         for epoch in range(1, self.epochs + 1):
-            batch_gen = batch_generator(X_data, y_data, 
+            batch_gen = batch_generator(X_data, y_data, batch_size=cf.batch_size,
                                  shuffle=self.shuffle)
             avg_loss = 0.0
             for i, (batch_x,batch_y) in enumerate(batch_gen):
@@ -200,7 +201,7 @@ class ConvNN(object):
 
     def loss_accuracy_save(self):
         current_path = os.getcwd()
-        os.chdir("c:\\Users\\nishitsuji\\Documents\\myfile\\python_tensorflow\\9_12_DGIM_validation\\")
+        os.chdir("c:\\Users\\youhe\\myfile\\CNN\\CNN_python\\execute\\9_28_DGIM_validation\\save")
 
         folder_name = "9_12_data_save"
         if folder_name not in  os.listdir():
