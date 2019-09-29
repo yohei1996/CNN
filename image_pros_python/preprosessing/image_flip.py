@@ -8,14 +8,6 @@ print(os.getcwd())
 os.chdir("C:\\Users\\youhe\\myfile\\CNN\\dataset\\arumihoiru\\split_anotate _argumentation\\1")
 print(os.getcwd())
 
-'''
-im.show()
-im.show()
-im = ImageOps.mirror(im)
-im.show()
-#im.save('savetest_'+filename)
-'''
-
 filelist= os.listdir()
 filelist.sort()
 print(filelist)
@@ -25,16 +17,17 @@ for filename in filelist:
     #print(filename)
     count+=1
     if('jpg' in filename):
-        with Image.open (filename) as im:
-            print(filename)
-            filename = filename.replace('.jpg','')
-            im_rotate90 = im.transpose(Image.ROTATE_90)
-            im_rotate90_m = im.transpose(Image.ROTATE_270)
-            im_rotate90.save(filename +'_90.jpg')
-            im_rotate90_m.save(filename +'_m_90.jpg')
-            print(filename +'_90.jpg saved.')
-            print(filename +'_90_m.jpg saved.')
+        img = cv2.imread(filename)
+        filename = filename.replace('.jpg','')
 
+        img_x = cv2.flip(img, 0)
+        img_y = cv2.flip(img, 1)
+        img_xy = cv2.flip(img, -1)
+        
+        cv2.imwrite( filename + '_x.jpg', img_x)
+        cv2.imwrite( filename + '_y.jpg', img_y)
+        cv2.imwrite( filename + '_xy.jpg', img_xy)
+        print(filename +"saved!")
 
 
 '''
