@@ -43,7 +43,9 @@ class ConvNN(object):
             self.saver = tf.train.Saver()
             
         ## create a session
-        config = tf.ConfigProto()
+        # config = tf.ConfigProto()
+        config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
+
         # config.gpu_options.allow_growth = True
         # config.gpu_options.per_process_gpu_memory_fraction = 0.2
         config.gpu_options.visible_device_list="0"
@@ -75,7 +77,7 @@ class ConvNN(object):
         ## 1st layer: Conv_1
         h1 = tf.layers.conv2d(tf_x_image, 
                               kernel_size=(5, 5), 
-                              filters=32, 
+                              filters=16, 
                               activation=tf.nn.relu)
         ## MaxPooling
         h1_pool = tf.layers.max_pooling2d(h1, 
@@ -83,7 +85,7 @@ class ConvNN(object):
                               strides=(2, 2))
         ## 2n layer: Conv_2
         h2 = tf.layers.conv2d(h1_pool, kernel_size=(5,5), 
-                              filters=64, 
+                              filters=32, 
                               activation=tf.nn.relu)
         ## MaxPooling 
         h2_pool = tf.layers.max_pooling2d(h2, 

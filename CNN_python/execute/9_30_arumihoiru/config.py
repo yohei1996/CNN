@@ -1,6 +1,6 @@
 #入力サイズ
-Height = 69
-Width = 69
+Height = 128
+Width = 128
 
 #クラスラベル
 Class_label = [
@@ -24,7 +24,7 @@ Test_dirs = [
 ]
 
 #ミニバッチ
-batch_size = 20
+batch_size = 10
 
 #データ拡張(data_loader.pyで使用)
 Horizontal_flip = False
