@@ -1,4 +1,5 @@
 # MINISTを読み込んでレイヤーAPIでCNNを構築するファイル
+import csv
 import tensorflow as tf
 import numpy as np
 import os
@@ -70,7 +71,7 @@ class ConvNN(object):
         tf_x_image = tf.reshape(tf_x, shape=[-1, cf.Height,cf.Width, 1],
                               name='input_x_2dimages')
         ## One-hot encoding:
-        tf_y_onehot = tf.one_hot(indices=tf_y, depth=2,
+        tf_y_onehot = tf.one_hot(indices=tf_y, depth=3,
                               dtype=tf.float32,
                               name='input_y_onehot')
 
@@ -107,7 +108,7 @@ class ConvNN(object):
                               training=is_train)
         
         ## 4th layer: Fully Connected (linear activation)
-        h4 = tf.layers.dense(h3_drop, 2, 
+        h4 = tf.layers.dense(h3_drop, 3, 
                               activation=None)
         print(h4)
         ## Prediction
@@ -246,13 +247,11 @@ def batch_generator(X, y, batch_size=50,
         rng = np.random.RandomState(random_seed)
         rng.shuffle(idx)
         X = X[idx]
-        y = y[idx]
-    
-    for i in range(0, X.shape[0], batch_size):
-        yield (X[i:i+batch_size, :], y[i:i+batch_size])
+        y = y[idx]y
+    for i in range(0, X.shaype[0], batch_size):
+        yield (X[i:i+batch_ysize, :], y[i:i+batch_size])
 
 def save_data2csv():
-    
     accuracy_load = np.load(file="./save/9_30_data_save/2019_09_30accuracy.npy")
     loss_load = np.load(file="./save/9_30_data_save/2019_09_30loss.npy")
     arr =[]
@@ -295,7 +294,7 @@ X_data = np.reshape(X_data,[-1,cf.Height*cf.Width])
 # print(X_data.shape)
 
 
-# show_image(X_data,y_data)
+show_image(X_data,y_data)
 
 
     # plt.imshow(X_data[0])
@@ -345,7 +344,8 @@ cnn2.load(epoch=20,path='./9_30_tflayers-model/')
 
 # print(cnn2.predict(X_test_centered[:10,:]))
 
-preds = cnn2.predict(X_test_centered)
+preds = cnn2.perdict(X_test_centered)
+probabry = cnn2.perdict(X_test_centered)
 
 print('Test Accuracy: %.2f%%' % (100*
       np.sum(y_test == preds)/len(y_test)))

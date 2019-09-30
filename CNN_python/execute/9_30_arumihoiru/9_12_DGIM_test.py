@@ -1,4 +1,5 @@
 # MINISTを読み込んでレイヤーAPIでCNNを構築するファイル
+import csv
 import tensorflow as tf
 import numpy as np
 import os
@@ -14,7 +15,7 @@ import cv2
 import datetime as dt
 
 class ConvNN(object):
-    def __init__(self, batchsize=64,
+    def __init__(self, batchsize=cf.batch_size,
                  epochs=20, learning_rate=1e-4, 
                  dropout_rate=0.5,
                  shuffle=True, random_seed=None):
@@ -43,9 +44,13 @@ class ConvNN(object):
             self.saver = tf.train.Saver()
             
         ## create a session
-        config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
+        # config = tf.ConfigProto()
+        config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
+
+        # config.gpu_options.allow_growth = True
+        # config.gpu_options.per_process_gpu_memory_fraction = 0.2
         config.gpu_options.visible_device_list="0"
+
         self.sess = tf.Session(graph=g,config=config)
                 
     def build(self):
@@ -66,14 +71,14 @@ class ConvNN(object):
         tf_x_image = tf.reshape(tf_x, shape=[-1, cf.Height,cf.Width, 1],
                               name='input_x_2dimages')
         ## One-hot encoding:
-        tf_y_onehot = tf.one_hot(indices=tf_y, depth=2,
+        tf_y_onehot = tf.one_hot(indices=tf_y, depth=3,
                               dtype=tf.float32,
                               name='input_y_onehot')
 
         ## 1st layer: Conv_1
         h1 = tf.layers.conv2d(tf_x_image, 
                               kernel_size=(5, 5), 
-                              filters=32, 
+                              filters=16, 
                               activation=tf.nn.relu)
         ## MaxPooling
         h1_pool = tf.layers.max_pooling2d(h1, 
@@ -81,7 +86,7 @@ class ConvNN(object):
                               strides=(2, 2))
         ## 2n layer: Conv_2
         h2 = tf.layers.conv2d(h1_pool, kernel_size=(5,5), 
-                              filters=64, 
+                              filters=32, 
                               activation=tf.nn.relu)
         ## MaxPooling 
         h2_pool = tf.layers.max_pooling2d(h2, 
@@ -103,7 +108,7 @@ class ConvNN(object):
                               training=is_train)
         
         ## 4th layer: Fully Connected (linear activation)
-        h4 = tf.layers.dense(h3_drop, 2, 
+        h4 = tf.layers.dense(h3_drop, 3, 
                               activation=None)
         print(h4)
         ## Prediction
@@ -140,7 +145,7 @@ class ConvNN(object):
             os.makedirs(path)
         print('Saving model in %s' % path)
         self.saver.save(self.sess, 
-                        os.path.join(path,file_name_date +'model.ckpt'),
+                        os.path.join(path,'model.ckpt'),
                         global_step=epoch)
         
     def load(self, epoch, path):
@@ -150,7 +155,8 @@ class ConvNN(object):
         
     def train(self, training_set, 
               validation_set=None,
-              initialize=True):
+              initialize=True,
+              return_proba = False):
         ## initialize variables
         print("start_init")
         if initialize:
@@ -161,7 +167,7 @@ class ConvNN(object):
         y_data = np.array(training_set[1])
 
         for epoch in range(1, self.epochs + 1):
-            batch_gen = batch_generator(X_data, y_data, 
+            batch_gen = batch_generator(X_data, y_data, batch_size=cf.batch_size,
                                  shuffle=self.shuffle)
             avg_loss = 0.0
             for i, (batch_x,batch_y) in enumerate(batch_gen):
@@ -176,16 +182,28 @@ class ConvNN(object):
             print('Epoch %02d: Training Avg. Loss: '
                   '%7.3f' % (epoch, avg_loss), end=' ')
             self.loss_data.append(avg_loss)
-            if validation_set is not None:
-                feed = {'tf_x:0': batch_x, 
-                        'tf_y:0': batch_y,
-                        'is_train:0': False} ## for dropout
-                valid_acc = self.sess.run('accuracy:0',
-                                          feed_dict=feed)
-                print('Validation Acc: %7.3f' % valid_acc)
-                self.accuracy_data.append(valid_acc)
+
+            feed = {'tf_x:0': validation_set[0],
+                'is_train:0': False} ## for dropout
+            if return_proba:
+                preds = self.sess.run('probabilities:0',
+                                     feed_dict=feed)
             else:
-                print()
+                preds = self.sess.run('labels:0',
+                                     feed_dict=feed)
+            self.accuracy_data.append(100*np.sum(validation_set[1] == preds)/len(validation_set[1]))
+            
+            print('Test Accuracy: %.2f%%' % (100*np.sum(validation_set[1] == preds)/len(validation_set[1])))
+            # if validation_set is not None:
+            #     feed = {'tf_x:0': batch_x, 
+            #             'tf_y:0': batch_y,
+            #             'is_train:0': False} ## for dropout
+            #     valid_acc = self.sess.run('accuracy:0',
+            #                               feed_dict=feed)
+            #     print('Validation Acc: %7.3f' % valid_acc)
+            #     self.accuracy_data.append(valid_acc)
+            # else:
+            #     print()
                     
     def predict(self, X_test, return_proba = False):
         feed = {'tf_x:0': X_test,
@@ -194,14 +212,14 @@ class ConvNN(object):
             return self.sess.run('probabilities:0',
                                  feed_dict=feed)
         else:
-            return self.sess.run('labels:0',
+            return self.sess.run('labels:0',,
                                  feed_dict=feed)
 
     def loss_accuracy_save(self):
         current_path = os.getcwd()
-        os.chdir("c:\\Users\\nishitsuji\\Documents\\myfile\\python_tensorflow\\9_12_DGIM_validation\\")
+        os.chdir("c:\\Users\\youhe\\myfile\\CNN\\CNN_python\\execute\\9_30_arumihoiru\\save")
 
-        folder_name = "9_12_data_save"
+        folder_name = "9_30_data_save"
         if folder_name not in  os.listdir():
             os.mkdir("./"+folder_name)
         os.chdir("./"+folder_name)
@@ -219,7 +237,8 @@ class ConvNN(object):
 
 
 
-def batch_generator(X, y, batch_size=64, 
+
+def batch_generator(X, y, batch_size=50, 
                     shuffle=False, random_seed=None):
     
     idx = np.arange(y.shape[0])
@@ -229,9 +248,18 @@ def batch_generator(X, y, batch_size=64,
         rng.shuffle(idx)
         X = X[idx]
         y = y[idx]
-    
-    for i in range(0, X.shape[0], batch_size):
-        yield (X[i:i+batch_size, :], y[i:i+batch_size])
+    for i in range(0, X.shaype[0], batch_size):
+        yield (X[i:i+batch_ysize, :], y[i:i+batch_size])
+
+def save_data2csv():
+    accuracy_load = np.load(file="./save/9_30_data_save/2019_09_30accuracy.npy")
+    loss_load = np.load(file="./save/9_30_data_save/2019_09_30loss.npy")
+    arr =[]
+    for xv,yv in zip(accuracy_load,loss_load):
+        arr.append([xv,yv])
+    with open("./save/condition_and_result/acc_and_loss.csv","w",encoding="Shift_jis") as f:
+        writer = csv.writer(f,lineterminator="\n")
+        writer.writerows(arr)
 
 def show_image(X_data,y_data):
     ok_count=0
@@ -266,21 +294,18 @@ X_data = np.reshape(X_data,[-1,cf.Height*cf.Width])
 # print(X_data.shape)
 
 
-# show_image(X_data,y_data)
+show_image(X_data,y_data)
 
 
     # plt.imshow(X_data[0])
     # test_imgs, test_gts = dl_test.get_minibatch(shuffle=True)
 print('Rows: %d,  Columns: %d' % (X_data.shape[0], X_data.shape[1]))
 
-X_train, y_train = X_data[:700], y_data[:700]
-X_valid, y_valid = X_data[700:], y_data[700:]
+X_train, y_train = X_data[:-300], y_data[:-300]
+X_valid, y_valid = X_data[-300:], y_data[-300:]
 
 X_test,y_test = zip(*random.sample(list(zip(X_data,y_data)),100))
 X_test = np.array(X_test)
-# print('Training:   ',X_train.shape, y_train.shape)
-# print('Validation: ',X_valid.shape, y_valid.shape)
-# print('Test Set:   ', X_test.shape, y_test.shape)
 
 
 
@@ -296,21 +321,16 @@ del X_data, y_data, X_train, X_valid , X_test
 
 print("loadCNN")
 cnn2 = ConvNN(random_seed=123)
-
-cnn2.load(epoch=20, path='./9_16_tflayers-model/')
+os.chdir("c:\\Users\\youhe\\myfile\\CNN\\CNN_python\\execute\\9_30_arumihoiru")
+cnn2.load(epoch=20,path='./9_30_tflayers-model/')
 
 # print(cnn2.predict(X_test_centered[:10,:]))
 
-import time
-print("テスト時間")
-print("ファイル枚数："+str(len(X_test_centered)))
-print("サイズ："+str(X_test_centered[0].shape))
-start = time.time()
-preds = cnn2.predict(X_test_centered)
-elapsed_time = time.time() - start
-print ("1000枚あたりの時間:{0}".format(elapsed_time) + "[sec]")
-print ("1枚あたりの時間:{0}".format(elapsed_time/len(X_test_centered)) + "[sec]")
-print("STOP!")
+preds = cnn2.predict(X_valid_centered)
+# probabry = cnn2.predict(X_test_centered)
 
 print('Test Accuracy: %.2f%%' % (100*
-      np.sum(y_test == preds)/len(y_test)))
+      np.sum(y_valid == preds)/len(y_valid)))
+
+test_accuracy = 100*np.sum(y_train == preds)/len(y_train)
+# save_data2csv()

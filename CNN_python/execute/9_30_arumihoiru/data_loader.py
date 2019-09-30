@@ -22,14 +22,20 @@ class DataLoader():
         self.prepare_datas(shuffle=shuffle)
 
     def prepare_datas(self, shuffle=True):
-        folder_path = 'C:\\Users\\youhe\\myfile\\CNN\\dataset\\arumihoiru\\split_anotate _argumentation\\'
+        folder_path = 'C:\\Users\\youhe\\myfile\\CNN\\dataset\\arumihoiru\\split_anotate _argumentation_class3'
         print('------------')
         label_paths = glob.glob(folder_path + '//*')
 
         load_count = 0
 
         for label_path in label_paths:
-            label = 0 if "OK" in label_path else 1
+
+            if "0" in label_path:
+                label = 0 
+            elif "1" in label_path:
+                label = 1
+            else:
+                label = 2
             files = glob.glob(label_path+'//*')
             for img_path in files:
                 # gt = self.get_gt(img_path)
