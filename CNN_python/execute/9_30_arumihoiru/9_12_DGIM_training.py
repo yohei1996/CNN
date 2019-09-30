@@ -190,7 +190,8 @@ class ConvNN(object):
             else:
                 preds = self.sess.run('labels:0',
                                      feed_dict=feed)
-
+            self.accuracy_data.append(100*np.sum(validation_set[1] == preds)/len(validation_set[1]))
+            
             print('Test Accuracy: %.2f%%' % (100*np.sum(validation_set[1] == preds)/len(validation_set[1])))
             # if validation_set is not None:
             #     feed = {'tf_x:0': batch_x, 
@@ -215,9 +216,9 @@ class ConvNN(object):
 
     def loss_accuracy_save(self):
         current_path = os.getcwd()
-        os.chdir("c:\\Users\\youhe\\myfile\\CNN\\CNN_python\\execute\\9_28_DGIM_validation\\save")
+        os.chdir("c:\\Users\\youhe\\myfile\\CNN\\CNN_python\\execute\\9_30_arumihoiru\\save")
 
-        folder_name = "9_12_data_save"
+        folder_name = "9_30_data_save"
         if folder_name not in  os.listdir():
             os.mkdir("./"+folder_name)
         os.chdir("./"+folder_name)
@@ -249,6 +250,17 @@ def batch_generator(X, y, batch_size=50,
     
     for i in range(0, X.shape[0], batch_size):
         yield (X[i:i+batch_size, :], y[i:i+batch_size])
+
+def save_data2csv():
+    
+    accuracy_load = np.load(file="./save/9_30_data_save/2019_09_30accuracy.npy")
+    loss_load = np.load(file="./save/9_30_data_save/2019_09_30loss.npy")
+    arr =[]
+    for xv,yv in zip(accuracy_load,loss_load):
+        arr.append([xv,yv])
+    with open("./save/condition_and_result/acc_and_loss.csv","w",encoding="Shift_jis") as f:
+        writer = csv.writer(f,lineterminator="\n")
+        writer.writerows(arr)
 
 def show_image(X_data,y_data):
     ok_count=0
@@ -295,9 +307,6 @@ X_valid, y_valid = X_data[-300:], y_data[-300:]
 
 X_test,y_test = zip(*random.sample(list(zip(X_data,y_data)),100))
 X_test = np.array(X_test)
-# print('Training:   ',X_train.shape, y_train.shape)
-# print('Validation: ',X_valid.shape, y_valid.shape)
-# print('Test Set:   ', X_test.shape, y_test.shape)
 
 
 
@@ -319,8 +328,10 @@ print("trainCNN")
 cnn.train(training_set=(X_train_centered, y_train), 
           validation_set=(X_valid_centered, y_valid))
 
+os.chdir("c:\\Users\\youhe\\myfile\\CNN\\CNN_python\\execute\\9_30_arumihoiru")
 print("saveCNN")
-cnn.save(epoch=20,path='./9_16_tflayers-model/')
+
+cnn.save(epoch=20,path='./9_30_tflayers-model/')
 
 print("LOSS_AND_CUURACY_SAVE")
 cnn.loss_accuracy_save()
@@ -330,7 +341,7 @@ del cnn
 print("loadCNN")
 cnn2 = ConvNN(random_seed=123)
 
-cnn2.load(epoch=20,path='./9_16_tflayers-model/')
+cnn2.load(epoch=20,path='./9_30_tflayers-model/')
 
 # print(cnn2.predict(X_test_centered[:10,:]))
 
@@ -339,12 +350,14 @@ preds = cnn2.predict(X_test_centered)
 print('Test Accuracy: %.2f%%' % (100*
       np.sum(y_test == preds)/len(y_test)))
 
+test_accuracy = 100*np.sum(y_test == preds)/len(y_test)
+save_data2csv()
 # elapsed_time = time.time() - start
-start = time.time()
-import time
-print("テスト時間")
-print("ファイル枚数："+str(len(X_test_centered)))
-print("サイズ："+str(X_test_centered[0].shape))
-print ("1000枚あたりの時間:{0}".format(elapsed_time) + "[sec]")
-print ("1枚あたりの時間:{0}".format(elapsed_time/len(X_test_centered)) + "[sec]")
-print("STOP!")
+# start = time.time()
+# import time
+# print("テスト時間")
+# print("ファイル枚数："+str(len(X_test_centered)))
+# print("サイズ："+str(X_test_centered[0].shape))
+# print ("1000枚あたりの時間:{0}".format(elapsed_time) + "[sec]")
+# print ("1枚あたりの時間:{0}".format(elapsed_time/len(X_test_centered)) + "[sec]")
+# print("STOP!")

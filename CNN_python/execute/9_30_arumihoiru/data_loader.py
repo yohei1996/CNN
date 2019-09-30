@@ -32,7 +32,7 @@ class DataLoader():
             label = 0 if "OK" in label_path else 1
             files = glob.glob(label_path+'//*')
             for img_path in files:
-                gt = self.get_gt(img_path)
+                # gt = self.get_gt(img_path)
                 img = self.load_image(img_path)
                 img = np.reshape(img,[cf.Height, cf.Width, 1])
                 # self.imgs = np.append(self.imgs,img)
